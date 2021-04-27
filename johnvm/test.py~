@@ -1,0 +1,16 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate oriented points sampled from a sphere
+# centered at (0,0,0) with radius 1
+
+n_pts = 1000
+pts = np.random.normal(size=(n_pts, 3))
+for i in range(n_pts):
+    pts[i, :] = pts[i, :]/np.linalg.norm(pts[i, :])
+
+
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+ax.scatter(pts[:, 0], pts[:, 1], pts[:, 2])
+plt.show()
