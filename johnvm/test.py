@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from johnvm.poisson import Point, Oriented_Point, Oriented_Points, Octree, Node
+from johnvm.util_vis import show_Oriented_Points, show_octree, show_octree_leaf
 import numpy as np
-import os
 
 import time
 # os.chdir("./johnvm")
@@ -24,13 +24,34 @@ def test_generate_sphere(n_pts=1000):
     return pts
 
 
-pts = test_generate_sphere(1000)
+def test_generate_plane(n_pts=1000):
+    """
+    Generate oriented points sampled from some plane
+    """
+    pts = Oriented_Points()  # initialize collector of points
+    point_matrix = np.random.uniform(size=(n_pts, 3))
+    normal_vec = np.array([1.0, -1.0, 1.0])
+    normal_vec = normal_vec/np.linalg.norm(normal_vec)
+    for i in range(n_pts):
+        point_matrix[i, :] -= np.dot(point_matrix[i, :],
+                                     normal_vec) * normal_vec
+        pts.add(Oriented_Point(point_matrix[i, 0],
+                               point_matrix[i, 1],
+                               point_matrix[i, 2],
+                               1.0, -1.0, 1.0))
+    return pts
 
-# pts.show()
-# pts.to_npts_file("lala")
 
-# pts.centroid()
-# max(pts.bbox_dim())
+pts = test_generate_plane(500)
+octree = Octree(pts, 1)
+show_octree(octree)
+
+
+show_Oriented_Points(pts)
+pts.to_npts_file("lala")
+
+pts.centroid()
+max(pts.bbox_dim())
 
 
 def get_volume(pts, size):
@@ -64,6 +85,3 @@ print(f"Execution time: {toc - tic:0.4f} seconds")
 plt.figure()
 plt.plot(sizes, leaves)
 plt.show()
-
-
-# octree.show()
