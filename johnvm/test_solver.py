@@ -45,8 +45,8 @@ def test_generate_sphere(n_pts=1000):
     return pts
 
 
-pts = test_generate_sphere(1000)
-octree = Octree(pts, 5)
+pts = test_generate_sphere(2000)
+octree = Octree(pts, 4)
 
 x_vector = solve_for_x(octree.leaf_nodes)
 
@@ -55,11 +55,20 @@ def my_fun(x, y):
     return indicator(x, y, 0.00, x_vector, octree.leaf_nodes)
 
 
-xlist = np.linspace(-1.0, 1.0, 100)
-ylist = np.linspace(-1.0, 1.0, 100)
+xlist = np.linspace(-1.0, 0.0, 100)
+ylist = np.linspace(0.0, 1.0, 100)
 X, Y = np.meshgrid(xlist, ylist)
 
-pt = octree.leaf_nodes[0].contents.points[0]
-indicator(pt.x+0.033, pt.y, pt.z, x_vector, octree.leaf_nodes)
+from tqdm import tqdm
+Z = np.full((len(xlist), len(ylist)), 0.00)
+for i, x in enumerate(tqdm(xlist)):
+    for j, y in enumerate(ylist):
+        Z[i,j] = my_fun(x,y)
 
-my_fun(1.00, 0.00)
+
+from matplotlib import cm
+fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+fig.show()
+

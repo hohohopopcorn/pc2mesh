@@ -343,8 +343,8 @@ def domain(oc, ow, ocp, owp):
     Used to obtain the domain of integration.
     It is called once per coordinate.
     """
-    minimum = max(oc-ow/2.0, ocp-owp/2)
-    maximum = min(oc+ow/2.0, ocp+owp/2)
+    minimum = max(oc-3.0*ow/2.0, ocp-3.0*owp/2)
+    maximum = min(oc+3.0*ow/2.0, ocp+3.0*owp/2)
     return (minimum, maximum)
 
 
@@ -429,7 +429,6 @@ def L(leaf_nodes: List[Node]):
         for j in range(len(leaf_nodes)):
             op = leaf_nodes[j]
             value = 0.00  # initialize
-            # I AM HERE
             aoop = 1/(o.width**5)*1/(op.width**3) * \
                 np.power(2*np.pi, -3.00)
             xmin, xmax = domain(o.center.x, o.width, op.center.x, op.width)
@@ -464,7 +463,7 @@ def fo(x, y, z, w, cx, cy, cz):
     """
     q = np.array([x, y, z])
     c = np.array([cx, cy, cz])
-    ok = np.abs(x-cx) < w/2.0 and np.abs(y-cy) < w/2.0 and np.abs(z-cz) < w/2.0
+    ok = np.abs(x-cx) < 3.0*w/2.0 and np.abs(y-cy) < 3.0*w/2.0 and np.abs(z-cz) < 3.0*w/2.0
     if ok:
         return np.power(2.0*np.pi, -3.0/2.0) \
             * (1.00/w**3) * (
