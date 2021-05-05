@@ -1,0 +1,4 @@
+github.com/EliCDavis/mesh v0.0.0-20200520022040-2be8174ccaa1 h1:6rZejl3/jao1Obv56LHY3Yw2HcNWf/irvmcB9GFHHjE=
+github.com/EliCDavis/mesh v0.0.0-20200520022040-2be8174ccaa1/go.mod h1:TT/ea8db3JukCg+AroCIIH8ViYGcfr717KlIe4ypnSs=
+github.com/EliCDavis/vector v0.0.0-20200616023845-ce88265e47b5 h1:C3u6+3sGuVLOi06zZkk0M4DzscM1RTUCgF/BHdbTMlY=
+github.com/EliCDavis/vector v0.0.0-20200616023845-ce88265e47b5/go.mod h1:7JWED8HBcDj9JWyV8wKNjCefl+tbh213fX9dkNqIDPY=
