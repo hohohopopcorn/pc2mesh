@@ -17,13 +17,15 @@ var cornersFromEdge = [][]uint8{{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3}, {1, 2, 3, 
 
 var surfaceLevel float64 = 0.5
 
-var res uint = 512
+var res uint = 64
 
 var doSmoothing bool = false
 
 var numThreads uint = 16
 
 var chans []chan []mesh.Polygon
+
+var f func(vector.Vector3) float64 = sphere_func
 
 //var hashmap map[[3]float64]float64 = make(map[[3]float64]float64)
 
@@ -129,6 +131,10 @@ func march(f func(vector.Vector3) float64, x_min float64, x_max float64, y_min f
 	dy := (y_max - y_min) / float64(res)
 	dz := (z_max - z_min) / float64(res)
 
+	if numThreads > res*res*res {
+		numThreads = res * res * res
+	}
+
 	chans = make([]chan []mesh.Polygon, numThreads)
 
 	for threadNum := uint(0); threadNum < numThreads; threadNum++ {
@@ -148,7 +154,7 @@ func march(f func(vector.Vector3) float64, x_min float64, x_max float64, y_min f
 
 func main() {
 	start := time.Now()
-	model, err := march(sphere_func, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
+	model, err := march(f, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
 	duration := time.Since(start)
 
 	fmt.Println(duration)
