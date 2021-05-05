@@ -17,7 +17,13 @@ var cornersFromEdge = [][]uint8{{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3}, {1, 2, 3, 
 
 var surfaceLevel float64 = 0.5
 
-var res uint = 128
+var res uint = 512
+
+var doSmoothing bool = false
+
+var numThreads uint = 16
+
+var chans []chan []mesh.Polygon
 
 //var hashmap map[[3]float64]float64 = make(map[[3]float64]float64)
 
@@ -92,7 +98,7 @@ func cube(f func(vector.Vector3) float64, gridNum uint, x_min float64, y_min flo
 			edgeIndex := triangulation[(faceNum*3)+vertexNum]
 			indexA := cornersFromEdge[0][edgeIndex]
 			indexB := cornersFromEdge[1][edgeIndex]
-			points[vertexNum] = mean(corners[indexA], corners[indexB], true, f)
+			points[vertexNum] = mean(corners[indexA], corners[indexB], doSmoothing, f)
 		}
 		poly, _ := mesh.NewPolygon(points[:], points[:])
 		output[faceNum] = poly
@@ -100,18 +106,41 @@ func cube(f func(vector.Vector3) float64, gridNum uint, x_min float64, y_min flo
 	return output, numFaces
 }
 
+func thread(f func(vector.Vector3) float64, threadNum uint, x_min float64, y_min float64, z_min float64, dx float64, dy float64, dz float64) {
+	var allPolygons []mesh.Polygon
+
+	numVertices := res * res * res
+	gridNumStart := (numVertices / numThreads) * threadNum
+	gridNumEnd := (numVertices / numThreads) * (threadNum + 1)
+	if gridNumEnd > numVertices {
+		gridNumEnd = numVertices
+	}
+
+	for gridNum := gridNumStart; gridNum < gridNumEnd; gridNum++ {
+		polygons, numFaces := cube(f, gridNum, x_min, y_min, z_min, dx, dy, dz)
+		allPolygons = append(allPolygons, polygons[:numFaces]...)
+	}
+
+	chans[threadNum] <- allPolygons
+}
+
 func march(f func(vector.Vector3) float64, x_min float64, x_max float64, y_min float64, y_max float64, z_min float64, z_max float64) (mesh.Model, error) {
 	dx := (x_max - x_min) / float64(res)
 	dy := (y_max - y_min) / float64(res)
 	dz := (z_max - z_min) / float64(res)
 
-	numVertices := res * res * res
+	chans = make([]chan []mesh.Polygon, numThreads)
+
+	for threadNum := uint(0); threadNum < numThreads; threadNum++ {
+		chans[threadNum] = make(chan []mesh.Polygon)
+		go thread(f, threadNum, x_min, y_min, z_min, dx, dy, dz)
+	}
 
 	var allPolygons []mesh.Polygon
 
-	for gridNum := uint(0); gridNum < numVertices; gridNum++ {
-		polygons, numFaces := cube(f, gridNum, x_min, y_min, z_min, dx, dy, dz)
-		allPolygons = append(allPolygons, polygons[:numFaces]...)
+	for threadNum := uint(0); threadNum < numThreads; threadNum++ {
+		polygons := <-chans[threadNum]
+		allPolygons = append(allPolygons, polygons...)
 	}
 
 	return mesh.NewModel(allPolygons)
