@@ -17,7 +17,7 @@ var cornersFromEdge = [][]uint8{{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3}, {1, 2, 3, 
 
 var surfaceLevel float64 = 0.5
 
-var res uint = 64
+var res uint = 512
 
 var doSmoothing bool = false
 
@@ -158,6 +158,7 @@ func main() {
 	duration := time.Since(start)
 
 	fmt.Println(duration)
+	fmt.Println(duration.Nanoseconds())
 
 	if err != nil {
 		panic(err)
